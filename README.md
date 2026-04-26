@@ -1,1 +1,290 @@
-# trade-calculator
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trading Analytics Pro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --brand-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --text-main: #2d3436;
+            --text-secondary: #636e72;
+            --success: #00b894;
+            --danger: #d63031;
+            --accent: #0984e3;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: #eef2f7;
+            /* 动态背景装饰 */
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(102, 126, 234, 0.15) 0, transparent 50%), 
+                radial-gradient(at 100% 100%, rgba(118, 75, 162, 0.15) 0, transparent 50%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            color: var(--text-main);
+        }
+
+        .container {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            padding: 40px;
+            width: 100%;
+            max-width: 480px;
+            border-radius: 24px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        header i {
+            font-size: 2.5rem;
+            background: var(--brand-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        h2 {
+            margin: 0;
+            font-size: 1.5rem;
+            letter-spacing: -0.5px;
+        }
+
+        p.subtitle {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        /* 网格布局优化 */
+        .input-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .full { grid-column: span 2; }
+
+        .field-group {
+            position: relative;
+        }
+
+        label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            margin-left: 4px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #f1f2f6;
+            border-radius: 12px;
+            box-sizing: border-box;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            background: #f8f9fa;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #764ba2;
+            background: #fff;
+            box-shadow: 0 0 0 4px rgba(118, 75, 162, 0.1);
+        }
+
+        /* 按钮美化 */
+        .actions {
+            margin-top: 30px;
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 12px;
+        }
+
+        button {
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn-secondary {
+            background: #f1f2f6;
+            color: var(--text-secondary);
+        }
+
+        .btn-primary {
+            background: var(--brand-gradient);
+            color: white;
+            box-shadow: 0 8px 20px rgba(118, 75, 162, 0.3);
+        }
+
+        button:active {
+            transform: scale(0.96);
+        }
+
+        /* 结果区域美化 */
+        .result-card {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 16px;
+            background: #2d3436; /* 深色主题结果区 */
+            color: white;
+            display: none;
+            animation: slideUp 0.4s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .res-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .res-label { font-size: 0.9rem; opacity: 0.8; }
+        .res-value { font-size: 1.2rem; font-weight: 800; }
+        
+        #resProfit.plus { color: var(--success); }
+        #resProfit.minus { color: var(--danger); }
+
+        .info-tag {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 6px 12px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            font-size: 0.75rem;
+            width: 100%;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <i class="fa-solid fa-chart-line"></i>
+        <h2>Trading Analytics</h2>
+        <p class="subtitle">交易盈亏与平衡比率分析</p>
+    </header>
+
+    <div class="input-grid">
+        <div class="field-group full">
+            <label><i class="fa-solid fa-wallet"></i> 账户资金 (USD)</label>
+            <input type="number" id="money" placeholder="0.00">
+        </div>
+        <div class="field-group">
+            <label>当前点差</label>
+            <input type="number" id="spread" placeholder="2.0">
+        </div>
+        <div class="field-group">
+            <label>交易手数</label>
+            <input type="number" id="volume" placeholder="0.10">
+        </div>
+        <div class="field-group">
+            <label>单笔保证金</label>
+            <input type="number" id="margin" placeholder="200">
+        </div>
+        <div class="field-group">
+            <label>返利系数 (0-1)</label>
+            <input type="number" id="back" placeholder="0.15">
+        </div>
+        <div class="field-group">
+            <label><i class="fa-solid fa-circle-up" style="color:var(--success)"></i> 盈利次数</label>
+            <input type="number" id="win" placeholder="0">
+        </div>
+        <div class="field-group">
+            <label><i class="fa-solid fa-circle-down" style="color:var(--danger)"></i> 亏损次数</label>
+            <input type="number" id="false" placeholder="0">
+        </div>
+    </div>
+
+    <div class="actions">
+        <button class="btn-secondary" onclick="resetAll()">重置</button>
+        <button class="btn-primary" onclick="calculate()">开始计算</button>
+    </div>
+
+    <div class="result-card" id="resultCard">
+        <div class="res-row">
+            <span class="res-label">预测净盈亏</span>
+            <span id="resProfit" class="res-value">$ 0.00</span>
+        </div>
+        <div class="res-row">
+            <span class="res-label">盈亏平衡比</span>
+            <span id="resBalance" class="res-value" style="color: var(--accent)">0.00</span>
+        </div>
+        <div class="info-tag" id="statusText">
+            数据分析完成
+        </div>
+    </div>
+</div>
+
+<script>
+    function calculate() {
+        const v = (id) => parseFloat(document.getElementById(id).value) || 0;
+
+        const money = v('money'),
+              spread = v('spread'),
+              volume = v('volume'),
+              margin = v('margin'),
+              back = v('back'),
+              win = v('win'),
+              loss = v('false');
+
+        const resultCard = document.getElementById('resultCard');
+        const profitEl = document.getElementById('resProfit');
+
+        // 保证金验证
+        if (money < (volume * margin)) {
+            alert("⚠️ 资金警告：账户可用余额不足以覆盖交易保证金。");
+            return;
+        }
+
+        // 计算逻辑
+        const profit = volume * (spread * (win - loss) - 2 * (1 - back) * (win + loss));
+        
+        const a = spread - 2 * (1 - back);
+        const b = spread + 2 * (1 - back);
+        const balance = a <= 0 ? "成本过高" : (b / a).toFixed(2);
+
+        // UI 渲染
+        resultCard.style.display = 'block';
+        profitEl.innerText = (profit >= 0 ? '+ ' : '') + '$ ' + profit.toLocaleString(undefined, {minimumFractionDigits: 2});
+        profitEl.className = 'res-value ' + (profit >= 0 ? 'plus' : 'minus');
+        
+        document.getElementById('resBalance').innerText = balance;
+        document.getElementById('statusText').innerText = profit >= 0 ? "📈 当前策略预期表现优异" : "📉 当前策略需要调整参数";
+    }
+
+    function resetAll() {
+        document.querySelectorAll('input').forEach(i => i.value = '');
+        document.getElementById('resultCard').style.display = 'none';
+    }
+</script>
+
+</body>
+</html>
